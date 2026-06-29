@@ -3,13 +3,32 @@
   "version": "0.1.0",
   "description": "Auto-detect your project's tech stack and install matching coding rules into Claude Code, Codex, and Cursor.",
   "type": "module",
+  "license": "MIT",
+  "author": "Chasen Liao (https://github.com/Chasen-Liao)",
+  "homepage": "https://github.com/Chasen-Liao/rules-aio#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Chasen-Liao/rules-aio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Chasen-Liao/rules-aio/issues"
+  },
+  "keywords": [
+    "claude-code",
+    "codex",
+    "cursor",
+    "cursorrules",
+    "rules",
+    "cli",
+    "ai-coding",
+    "agent-rules"
+  ],
   "bin": {
     "rules-aio": "dist/index.js"
   },
   "files": [
     "dist",
-    "rules",
-    "src/registry/rules-index.json"
+    "rules"
   ],
   "scripts": {
     "build": "tsc",
@@ -22,9 +41,11 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^7.0.0",
-    "commander": "^12.0.0"
+    "commander": "^12.0.0",
+    "figlet": "^1.11.0"
   },
   "devDependencies": {
+    "@types/figlet": "^1.7.0",
     "@types/node": "^26.0.1",
     "tsx": "^4.0.0",
     "typescript": "^5.4.0",

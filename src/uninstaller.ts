@@ -4,6 +4,7 @@ import type { Agent } from "./registry/index.js";
 import { readManifest, writeManifest, removeManifest } from "./manifest.js";
 import { claudeImportLine } from "./converter/index.js";
 import { writeManagedSection } from "./installer.js";
+import { step, info, arrow, dim } from "./ui.js";
 
 export interface UninstallOptions {
   targets?: Agent[];
@@ -12,7 +13,7 @@ export interface UninstallOptions {
 export async function uninstall(rootDir: string, opts: UninstallOptions = {}): Promise<void> {
   const manifest = await readManifest(rootDir);
   if (!manifest) {
-    console.log("No rules-aio manifest found. Nothing to uninstall.");
+    console.log(info("No rules-aio manifest found.", "Nothing to uninstall."));
     return;
   }
 
@@ -45,9 +46,11 @@ export async function uninstall(rootDir: string, opts: UninstallOptions = {}): P
 
   if (remaining.length === 0) {
     await removeManifest(rootDir);
-    console.log("Uninstalled all rules-aio rules. Manifest removed.");
+    console.log(`\n  ${step("Uninstalled all rules-aio rules.")} ${dim("Manifest removed.")}\n`);
   } else {
     await writeManifest(rootDir, { rules: ruleIds, targets: remaining });
-    console.log(`Uninstalled targets: ${targets.join(", ")}. Remaining: ${remaining.join(", ")}.`);
+    console.log(
+      `\n  ${step(`Removed ${targets.join(", ")}`)} ${dim(`${arrow} remaining: ${remaining.join(", ")}`)}\n`
+    );
   }
 }

@@ -5,6 +5,7 @@ import { detectProject } from "./detector.js";
 import { allRules, matchRules, readRuleContent, type Agent, type Rule } from "./registry/index.js";
 import { claudeImportLine, toCodexChunk } from "./converter/index.js";
 import { writeManifest, type Manifest } from "./manifest.js";
+import { step, info, dot, arrow, cyan, bold, dim } from "./ui.js";
 
 const ALL_AGENTS: Agent[] = ["cursor", "claude", "codex"];
 
@@ -51,9 +52,12 @@ export interface InstallOptions {
 
 export async function install(rootDir: string, opts: InstallOptions = {}): Promise<void> {
   const stack = await detectProject(rootDir);
+  if (stack.length) {
+    console.log(info("Detected stack", stack.join(` ${dot} `)));
+  }
   const recommended = matchRules(stack);
   if (recommended.length === 0) {
-    console.log("No matching rules detected for this project.");
+    console.log(info("No matching rules detected for this project."));
     return;
   }
 
@@ -101,8 +105,12 @@ export async function install(rootDir: string, opts: InstallOptions = {}): Promi
   };
   await writeManifest(rootDir, manifest);
 
+  console.log();
+  for (const rule of selectedRules) {
+    console.log(`  ${step(rule.id, rule.title)}`);
+  }
   console.log(
-    `Installed ${selectedRules.length} rule(s) for ${targets.join(", ")}: ${selectedRules.map((r) => r.id).join(", ")}`
+    `\n  ${bold(cyan("Done"))} ${dim(`${dot} ${selectedRules.length} rule(s) ${arrow} ${targets.join(", ")}`)}\n`
   );
 }
 

@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { install } from "./installer.js";
 import { uninstall } from "./uninstaller.js";
+import { printBanner } from "./banner.js";
 import type { Agent } from "./registry/index.js";
 
 const VALID_AGENTS: Agent[] = ["cursor", "claude", "codex"];
@@ -24,6 +25,7 @@ export async function run(argv: string[] = process.argv): Promise<void> {
     .option("-y, --yes", "skip prompts; install all detected rules for all agents")
     .option("-t, --target <agents>", "comma-separated agents: cursor,claude,codex")
     .action(async (opts: { yes?: boolean; target?: string }) => {
+      printBanner();
       const targets = parseTargets(opts.target);
       await install(process.cwd(), { yes: opts.yes, targets });
     });
@@ -33,6 +35,7 @@ export async function run(argv: string[] = process.argv): Promise<void> {
     .description("Remove previously installed rules-aio rules")
     .option("-t, --target <agents>", "comma-separated agents to remove: cursor,claude,codex")
     .action(async (opts: { target?: string }) => {
+      printBanner();
       const targets = parseTargets(opts.target);
       await uninstall(process.cwd(), { targets });
     });
