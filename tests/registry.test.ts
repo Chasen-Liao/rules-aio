@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { allRules, matchRules } from "../src/registry/index.js";
+import { allRules, matchRules, readRuleContent } from "../src/registry/index.js";
 
 describe("registry", () => {
   it("allRules returns a non-empty array", () => {
@@ -19,5 +19,21 @@ describe("registry", () => {
 
   it("matchRules returns empty for unknown stack", () => {
     expect(matchRules(["cobol"])).toEqual([]);
+  });
+});
+
+describe("readRuleContent", () => {
+  it("reads the cursor variant (with frontmatter)", async () => {
+    const content = await readRuleContent("react", "cursor");
+    expect(content.startsWith("---")).toBe(true);
+  });
+
+  it("reads the claude variant (frontmatter stripped)", async () => {
+    const content = await readRuleContent("react", "claude");
+    expect(content.startsWith("---")).toBe(false);
+  });
+
+  it("throws for unknown rule id", async () => {
+    await expect(readRuleContent("nope", "claude")).rejects.toThrow();
   });
 });

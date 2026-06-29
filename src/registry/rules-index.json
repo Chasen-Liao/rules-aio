@@ -1,66 +1,10 @@
 [
-  {
-    "id": "nextjs",
-    "title": "Next.js",
-    "tags": ["next", "react", "typescript"],
-    "rawUrl": "https://raw.githubusercontent.com/PatrickJS/awesome-cursorrules/main/rules/nextjs.mdc",
-    "license": "MIT",
-    "description": "Next.js full-stack conventions."
-  },
-  {
-    "id": "react",
-    "title": "React",
-    "tags": ["react", "typescript"],
-    "rawUrl": "https://raw.githubusercontent.com/PatrickJS/awesome-cursorrules/main/rules/react.mdc",
-    "license": "MIT",
-    "description": "React component and hooks conventions."
-  },
-  {
-    "id": "typescript",
-    "title": "TypeScript",
-    "tags": ["typescript", "node"],
-    "rawUrl": "https://raw.githubusercontent.com/PatrickJS/awesome-cursorrules/main/rules/typescript.mdc",
-    "license": "MIT",
-    "description": "TypeScript type-safety conventions."
-  },
-  {
-    "id": "nodejs",
-    "title": "Node.js",
-    "tags": ["node"],
-    "rawUrl": "https://raw.githubusercontent.com/PatrickJS/awesome-cursorrules/main/rules/node-express.mdc",
-    "license": "MIT",
-    "description": "Node.js backend conventions."
-  },
-  {
-    "id": "python",
-    "title": "Python",
-    "tags": ["python"],
-    "rawUrl": "https://raw.githubusercontent.com/PatrickJS/awesome-cursorrules/main/rules/python.mdc",
-    "license": "MIT",
-    "description": "Python conventions."
-  },
-  {
-    "id": "fastapi",
-    "title": "FastAPI",
-    "tags": ["fastapi", "python"],
-    "rawUrl": "https://raw.githubusercontent.com/PatrickJS/awesome-cursorrules/main/rules/fastapi.mdc",
-    "license": "MIT",
-    "description": "FastAPI conventions."
-  },
-  {
-    "id": "go",
-    "title": "Go",
-    "tags": ["go"],
-    "rawUrl": "https://raw.githubusercontent.com/PatrickJS/awesome-cursorrules/main/rules/go.mdc",
-    "license": "MIT",
-    "description": "Go conventions."
-  },
-  {
-    "id": "rust",
-    "title": "Rust",
-    "tags": ["rust"],
-    "rawUrl": "https://raw.githubusercontent.com/PatrickJS/awesome-cursorrules/main/rules/rust.mdc",
-    "license": "MIT",
-    "description": "Rust conventions."
-  }
+  { "id": "nextjs", "title": "Next.js", "tags": ["next", "react", "typescript"] },
+  { "id": "react", "title": "React", "tags": ["react", "typescript"] },
+  { "id": "typescript", "title": "TypeScript", "tags": ["typescript", "node"] },
+  { "id": "nodejs", "title": "Node.js", "tags": ["node"] },
+  { "id": "python", "title": "Python", "tags": ["python"] },
+  { "id": "fastapi", "title": "FastAPI", "tags": ["fastapi", "python"] },
+  { "id": "go", "title": "Go", "tags": ["go"] },
+  { "id": "rust", "title": "Rust", "tags": ["rust"] }
 ]
