@@ -3,6 +3,7 @@ import { mkdtemp, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { writeManagedSection, install } from "../src/installer.js";
+import { readManifest } from "../src/manifest.js";
 
 let dir: string;
 let file: string;
@@ -42,27 +43,29 @@ describe("writeManagedSection", () => {
 });
 
 describe("install", () => {
-  it("in --yes mode, writes cursor/claude/codex files for a fake react project", async () => {
+  it("in --yes mode with all targets, writes cursor/claude/codex + manifest for a react project", async () => {
     await writeFile(path.join(dir, "package.json"), JSON.stringify({ dependencies: { react: "^18" } }));
 
-    const fakeRaw = "---\ndescription: x\n---\n# React rules\nbe strict";
-    const deps = {
-      fetchRaw: async () => fakeRaw,
-    };
+    await install(dir, { yes: true });
 
-    await install(dir, { yes: true }, deps);
-
-    const cursorFile = await readFile(path.join(dir, ".cursor/rules/react.mdc"), "utf8");
-    expect(cursorFile).toBe(fakeRaw);
-
-    const claudeRule = await readFile(path.join(dir, ".claude/rules/react.md"), "utf8");
-    expect(claudeRule).toBe("# React rules\nbe strict");
-
+    expect(await readFile(path.join(dir, ".cursor/rules/react.mdc"), "utf8")).toContain("# React");
+    expect(await readFile(path.join(dir, ".claude/rules/react.md"), "utf8")).toContain("# React");
     const claudeMd = await readFile(path.join(dir, "CLAUDE.md"), "utf8");
     expect(claudeMd).toContain("@.claude/rules/react.md");
-
     const agentsMd = await readFile(path.join(dir, "AGENTS.md"), "utf8");
     expect(agentsMd).toContain("## React");
-    expect(agentsMd).toContain("be strict");
+
+    const m = await readManifest(dir);
+    expect(m?.rules).toContain("react");
+    expect(m?.targets).toEqual(expect.arrayContaining(["claude", "codex", "cursor"]));
+  });
+
+  it("with targets cursor only, writes only cursor files", async () => {
+    await writeFile(path.join(dir, "package.json"), JSON.stringify({ dependencies: { react: "^18" } }));
+    await install(dir, { yes: true, targets: ["cursor"] });
+
+    expect(await readFile(path.join(dir, ".cursor/rules/react.mdc"), "utf8")).toContain("# React");
+    await expect(readFile(path.join(dir, "CLAUDE.md"), "utf8")).rejects.toThrow();
+    await expect(readFile(path.join(dir, "AGENTS.md"), "utf8")).rejects.toThrow();
   });
 });
