@@ -1,73 +1,45 @@
-# React Best Practices
+# React
+Conventions for writing React components — read files before editing, run tests before finishing.
 
-## Component Structure
-- Use functional components over class components
-- Keep components small and focused
-- Extract reusable logic into custom hooks
-- Use composition over inheritance
-- Implement proper prop types with TypeScript
-- Split large components into smaller, focused ones
+## Components
+- Use functional components only. No class components.
+- One component per file. Keep components under ~150 lines; extract sub-components or hooks when they grow beyond a single responsibility.
+- Read the existing component file and its imports before making changes. Match the established style, export pattern, and conventions.
+- Use composition (children, render props, slots) over inheritance and deep prop drilling.
 
 ## Hooks
-- Follow the Rules of Hooks
-- Use custom hooks for reusable logic
-- Keep hooks focused and simple
-- Use appropriate dependency arrays in useEffect
-- Implement cleanup in useEffect when needed
-- Avoid nested hooks
+- Follow the Rules of Hooks: call only at the top level of a component or custom hook.
+- Extract reusable stateful logic into custom hooks (`use*.ts`).
+- Include every reactive value in `useEffect` and `useMemo` dependency arrays. Fix stale closures, don't suppress them.
+- Add cleanup for subscriptions, timers, and event listeners in `useEffect` return.
 
-## State Management
-- Use useState for local component state
-- Implement useReducer for complex state logic
-- Use Context API for shared state
-- Keep state as close to where it's used as possible
-- Avoid prop drilling through proper state management
-- Use state management libraries only when necessary
+## State
+- `useState` for simple local state; `useReducer` for state with complex transitions.
+- Keep state as close to where it is consumed as possible. Lift only when siblings need it.
+- Use Context only when prop drilling exceeds 3 levels. Prefer server-state libraries (TanStack Query, SWR) over `useState` + `useEffect` for fetched data.
+- Avoid adding external state management libraries unless the project already uses one.
 
 ## Performance
-- Implement proper memoization (useMemo, useCallback)
-- Use React.memo for expensive components
-- Avoid unnecessary re-renders
-- Implement proper lazy loading
-- Use proper key props in lists
-- Profile and optimize render performance
+- Use `React.memo`, `useMemo`, and `useCallback` only when profiling shows unnecessary re-renders — not preemptively.
+- Always provide a stable `key` for list items. Never use array index when items can reorder or be removed.
 
 ## Forms
-- Use controlled components for form inputs
-- Implement proper form validation
-- Handle form submission states properly
-- Show appropriate loading and error states
-- Use form libraries for complex forms
-- Implement proper accessibility for forms
+- Use controlled components with validation wired up. Show field-level errors before submission.
+- Display loading and error states during async form submission.
 
 ## Error Handling
-- Implement Error Boundaries
-- Handle async errors properly
-- Show user-friendly error messages
-- Implement proper fallback UI
-- Log errors appropriately
-- Handle edge cases gracefully
-
-## Testing
-- Write unit tests for components
-- Implement integration tests for complex flows
-- Use React Testing Library
-- Test user interactions
-- Test error scenarios
-- Implement proper mock data
+- Wrap feature trees in Error Boundaries with fallback UI so one broken component does not crash the whole page.
+- Handle async errors in hooks and effects; show user-friendly messages, not raw stack traces.
 
 ## Accessibility
-- Use semantic HTML elements
-- Implement proper ARIA attributes
-- Ensure keyboard navigation
-- Test with screen readers
-- Handle focus management
-- Provide proper alt text for images
+- Use semantic HTML elements. Add ARIA attributes where native semantics are insufficient.
+- Ensure keyboard navigation and focus management. Provide alt text for images.
 
-## Code Organization
-- Group related components together
-- Use proper file naming conventions
-- Implement proper directory structure
-- Keep styles close to components
-- Use proper imports/exports
-- Document complex component logic
+## Testing
+- Write tests with React Testing Library. Test user behavior (queries by role/text, userEvent), not implementation details.
+- Run `npx vitest` or `npm test` and confirm all relevant tests pass before finishing.
+- Run `tsc --noEmit` to check for type errors after component changes.
+
+## Verification
+- Read the files you will change before editing. Check existing tests, types, and adjacent components.
+- After edits, run the project's lint command (`npm run lint`, `eslint .`), typecheck, and test suite to confirm nothing is broken.

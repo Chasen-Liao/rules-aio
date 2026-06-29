@@ -1,115 +1,45 @@
-# Python Best Practices
+# Python
+Conventions for writing clean, idiomatic Python with type hints and tests — run formatters and tests before finishing.
 
-## Project Structure
-- Use src-layout with `src/your_package_name/`
-- Place tests in `tests/` directory parallel to `src/`
-- Keep configuration in `config/` or as environment variables
-- Store requirements in `requirements.txt` or `pyproject.toml`
-- Place static files in `static/` directory
-- Use `templates/` for Jinja2 templates
+## Project Layout
+- Use src-layout: `src/` for application code, `tests/` at the repo root.
+- Pin dependencies with version ranges in `pyproject.toml` or `requirements.txt`. Separate dev dependencies.
+- Place configuration in environment variables or a `config` module. Validate required config at startup.
 
 ## Code Style
-- Follow Black code formatting
-- Use isort for import sorting
-- Follow PEP 8 naming conventions:
-  - snake_case for functions and variables
-  - PascalCase for classes
-  - UPPER_CASE for constants
-- Maximum line length of 88 characters (Black default)
-- Use absolute imports over relative imports
+- Format with Black (88 char line length). Sort imports with isort. Lint with `ruff` or `flake8`.
+- Follow PEP 8 naming: `snake_case` for functions/variables, `PascalCase` for classes, `UPPER_SNAKE_CASE` for constants.
+- Prefer absolute imports over relative. Use `__all__` to control the public API of modules.
+- Read the file you are editing before making changes — match existing style and patterns.
 
 ## Type Hints
-- Use type hints for all function parameters and returns
-- Import types from `typing` module
-- Use `Optional[Type]` instead of `Type | None`
-- Use `TypeVar` for generic types
-- Define custom types in `types.py`
-- Use `Protocol` for duck typing
-
-## Flask Structure
-- Use Flask factory pattern
-- Organize routes using Blueprints
-- Use Flask-SQLAlchemy for database
-- Implement proper error handlers
-- Use Flask-Login for authentication
-- Structure views with proper separation of concerns
-
-## Database
-- Use SQLAlchemy ORM
-- Implement database migrations with Alembic
-- Use proper connection pooling
-- Define models in separate modules
-- Implement proper relationships
-- Use proper indexing strategies
-
-## Authentication
-- Use Flask-Login for session management
-- Implement Google OAuth using Flask-OAuth
-- Hash passwords with bcrypt
-- Use proper session security
-- Implement CSRF protection
-- Use proper role-based access control
-
-## API Design
-- Use Flask-RESTful for REST APIs
-- Implement proper request validation
-- Use proper HTTP status codes
-- Handle errors consistently
-- Use proper response formats
-- Implement proper rate limiting
-
-## Testing
-- Use pytest for testing
-- Write tests for all routes
-- Use pytest-cov for coverage
-- Implement proper fixtures
-- Use proper mocking with pytest-mock
-- Test all error scenarios
-
-## Security
-- Use HTTPS in production
-- Implement proper CORS
-- Sanitize all user inputs
-- Use proper session configuration
-- Implement proper logging
-- Follow OWASP guidelines
-
-## Performance
-- Use proper caching with Flask-Caching
-- Implement database query optimization
-- Use proper connection pooling
-- Implement proper pagination
-- Use background tasks for heavy operations
-- Monitor application performance
+- Annotate all function parameters and return types. Use `mypy` (or `pyright`) for type checking.
+- Use `X | None` (PEP 604) for Python 3.10+; keep `Optional[X]` for older versions.
+- Use `Protocol` for structural/duck typing instead of abstract base classes.
+- Define domain types in a `types.py` or inline near usage.
 
 ## Error Handling
-- Create custom exception classes
-- Use proper try-except blocks
-- Implement proper logging
-- Return proper error responses
-- Handle edge cases properly
-- Use proper error messages
+- Define custom exception classes for domain errors (inherit from a project base or `Exception`).
+- Catch specific exceptions, never bare `except:`. Log before re-raising if the error needs visibility.
+- Return early on failure conditions — avoid deep nesting from guard clauses.
 
-## Documentation
-- Use Google-style docstrings
-- Document all public APIs
-- Keep README.md updated
-- Use proper inline comments
-- Generate API documentation
-- Document environment setup
+## Flask Conventions
+- Use the Flask factory pattern. Organize routes with Blueprints.
+- Use Flask-SQLAlchemy for database, Flask-Login for authentication.
+- Handle errors with proper HTTP status codes and user-facing messages.
 
-## Development Workflow
-- Use virtual environments (venv)
-- Implement pre-commit hooks
-- Use proper Git workflow
-- Follow semantic versioning
-- Use proper CI/CD practices
-- Implement proper logging
+## Database
+- Use SQLAlchemy ORM (or the project's existing ORM). Define models in dedicated `models/` modules.
+- Run migrations with Alembic — generate, review, then apply. Never hand-edit schema in production.
+- Use connection pooling; configure based on expected concurrency.
 
-## Dependencies
-- Pin dependency versions
-- Use requirements.txt for production
-- Separate dev dependencies
-- Use proper package versions
-- Regularly update dependencies
-- Check for security vulnerabilities
+## Testing
+- Use pytest. Write tests in `tests/` mirroring the `src/` structure.
+- Use fixtures for setup/teardown. Use `pytest-mock` for mocking.
+- Run `pytest` and confirm all relevant tests pass before finishing.
+- Run `pytest --cov` to check coverage when adding new code.
+
+## Verification
+- Run `black --check .` and `ruff check .` (or the project's lint command) before finishing.
+- Run `mypy src/` or `pyright` to verify type correctness.
+- Run `pytest` and confirm a green result.

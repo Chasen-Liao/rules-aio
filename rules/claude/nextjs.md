@@ -1,47 +1,31 @@
-# Next.js Best Practices
+# Next.js
+Conventions for building apps with Next.js App Router.
 
-## Project Structure
-- Use the App Router directory structure
-- Place components in `app` directory for route-specific components
-- Place shared components in `components` directory
-- Place utilities and helpers in `lib` directory
-- Use lowercase with dashes for directories (e.g., `components/auth-wizard`)
+## Router and Structure
+- Use the App Router (`app/` directory). Pages are `app/` route segments with `page.tsx` exports.
+- Co-locate route-specific components in the same `app/` segment; shared components go in `components/`, utilities in `lib/`.
+- Use lowercase-dash directory names (e.g., `components/auth-wizard/`).
+- Read the existing `app/` layout and routing structure before adding new routes or components.
 
-## Components
-- Use Server Components by default
-- Mark client components explicitly with 'use client'
-- Wrap client components in Suspense with fallback
-- Use dynamic loading for non-critical components
-- Implement proper error boundaries
-- Place static content and interfaces at file end
+## Server vs Client Components
+- Default to Server Components. Only add `'use client'` when the component needs interactivity, hooks, or browser APIs.
+- Keep the client boundary as low as possible — push state and effects down into leaf components.
+- Wrap lazy-loaded or async client components in `<Suspense>` with a meaningful fallback UI.
+
+## Data Fetching and Caching
+- Fetch data in Server Components using `async/await` or server actions. Avoid `useEffect` for data fetching.
+- Respect Next.js caching defaults; use `revalidate` or `noStore` only when the use-case demands it.
+- For mutations, use Server Actions or route handlers — not client-side `fetch` to own API routes.
 
 ## Performance
-- Optimize images: Use WebP format, size data, lazy loading
-- Minimize use of 'useEffect' and 'setState'
-- Favor Server Components (RSC) where possible
-- Use dynamic loading for non-critical components
-- Implement proper caching strategies
-
-## Data Fetching
-- Use Server Components for data fetching when possible
-- Implement proper error handling for data fetching
-- Use appropriate caching strategies
-- Handle loading and error states appropriately
-
-## Routing
-- Use the App Router conventions
-- Implement proper loading and error states for routes
-- Use dynamic routes appropriately
-- Handle parallel routes when needed
+- Use `next/image` with explicit `width`/`height` or `fill` and proper `sizes` hints.
+- Use `next/dynamic` for components that are below the fold or conditionally rendered.
+- Avoid unnecessary `useState` and `useEffect` in Server Component trees.
 
 ## Forms and Validation
-- Use Zod for form validation
-- Implement proper server-side validation
-- Handle form errors appropriately
-- Show loading states during form submission
+- Use Zod schemas (or the project's existing validation library) for both client and server-side validation.
+- Show loading and error states during form submission; do not silently swallow submission errors.
 
-## State Management
-- Minimize client-side state
-- Use React Context sparingly
-- Prefer server state when possible
-- Implement proper loading states
+## Type Safety
+- Read existing types/interfaces in the project before defining new ones. Follow the project's typing patterns.
+- Co-locate props interfaces with their component files; export only when shared.

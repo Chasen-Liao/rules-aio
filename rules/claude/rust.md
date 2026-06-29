@@ -1,80 +1,36 @@
-# Rust + Solana (Anchor) Best Practices
+# Rust (Solana / Anchor)
+Conventions for writing Solana programs with Anchor and the Rust SDK.
 
 ## Program Structure
-- Structure Solana programs using `Anchor` framework standards
-- Place program entrypoint logic in `lib.rs`, not `main.rs`
-- Organize handlers into modules (e.g., `initialize`, `update`, `close`)
-- Separate state definitions, errors, instructions, and utils
-- Group reusable logic under a `utils` module (e.g., account validation)
-- Use `declare_id!()` to define program ID
+- Place program entrypoint in `lib.rs`, not `main.rs`.
+- Organize instruction handlers into modules by action (`instructions/initialize.rs`, `update.rs`, `close.rs`).
+- Separate concerns: `state/` for account structs, `errors/` for custom error codes, `instructions/` for handlers, `utils/` for shared logic.
+- Use `declare_id!()` to bind the program ID. Keep `Anchor.toml` in sync.
 
-## Anchor Framework
-- Use `#[derive(Accounts)]` for all instruction contexts
-- Validate accounts strictly using constraint macros (e.g., `#[account(mut)]`, `seeds`, `bump]`)
-- Define all state structs with `#[account]` and `#[derive(AnchorSerialize, AnchorDeserialize)]`
-- Prefer `Init`, `Close`, `Realloc`, `Mut`, and constraint macros to avoid manual deserialization
-- Use `ctx.accounts` to access validated context accounts
-- Handle CPI (Cross-Program Invocation) calls via Anchor’s CPI helpers
+## Anchor Patterns
+- Use `#[derive(Accounts)]` for every instruction context — validate accounts via Anchor constraint macros, not manual checks.
+- Mark mutable accounts with `#[account(mut)]`. Use `seeds` and `bump` for PDAs.
+- Define account structs with `#[account]` and `AnchorSerialize`/`AnchorDeserialize`.
+- Access validated accounts through `ctx.accounts`, not raw `AccountInfo`.
 
 ## Serialization
-- Use **Borsh** or Anchor's custom serializer (not Serde) for on-chain data
-- Always include `#[account(zero_copy)]` or `#[repr(C)]` for packed structures
-- Avoid floating point types — use `u64`, `u128`, or fixed-point math
-- Zero out or close unused accounts to reduce rent costs
+- Use Borsh (Anchor's default) for on-chain data — never Serde.
+- Use `#[account(zero_copy)]` and `#[repr(C)]` for packed/zero-copy structures.
+- No floating point — use `u64`, `u128`, or fixed-point arithmetic.
+
+## Security
+- Always verify the signer: `constraint = authority.is_signer`.
+- Prevent replay by deriving PDAs with unique seeds.
+- Validate program IDs on CPI targets. Check account sizes before realloc.
+- Never panic in instruction handlers — return `ProgramError::Custom(error_code)`.
+- Use `solana_program::msg!` for logging; never use `println!` or `dbg!`.
 
 ## Testing
-- Write tests in TypeScript using Anchor’s Mocha + Chai setup (`tests/*.ts`)
-- Use `anchor.workspace.MyProgram` to load deployed contracts
-- Use `provider.simulate()` to inspect failed txs
-- Spin up a local validator (`anchor test`) and reset between tests
-- Airdrop SOL to wallets with `provider.connection.requestAirdrop(...)`
-- Validate program logs using `tx.confirmation.logMessages`
+- Write integration tests in `tests/*.ts` using Anchor's Mocha + Chai setup.
+- Use `provider.simulate()` to inspect failed transactions; airdrop SOL with `requestAirdrop`.
+- Run `anchor test` locally and verify all tests pass before declaring work done.
 
-## Solana SDK (Manual)
-- Use `solana_program` crate when not using Anchor (bare-metal programs)
-- Carefully deserialize accounts using `AccountInfo`, `try_from_slice_unchecked`
-- Use `solana_program::msg!` for lightweight debugging logs
-- Verify accounts via `is_signer`, `is_writable`, `key == expected`
-- Never panic! Use `ProgramError::Custom(u32)` or `ErrorCode` enums
-
-## Security Patterns
-- Always validate `msg.sender`/signer with `account_info.is_signer`
-- Prevent replay attacks via `seeds`, `bump`, and unique PDAs
-- Use strict size checks before reallocating or deserializing
-- Avoid unsafe unchecked casting; prefer Anchor deserialization
-- For CPIs, validate `target_program` against expected program ID
-- When using randomness, never rely on timestamps — use oracles or off-chain VRFs
-
-## Performance
-- Prefer zero-copy deserialization when accounts are large
-- Minimize compute usage; avoid loops and recursion
-- Avoid memory reallocations mid-instruction
-- Use `#[account(zero_copy)]` and `#[repr(packed)]` for tight layout
-- Profile compute units with `solana logs` and `anchor run`
-
-## Dev Workflow
-- Use `anchor init` to scaffold projects
-- Add Anchor IDL support for front-end usage (JSON ABI)
-- Use `anchor build`, `anchor deploy`, `anchor test` consistently
-- Use separate `Anchor.toml` environments for devnet/mainnet/localnet
-- Format all Rust code with `cargo fmt`, lint with `cargo clippy`
-- Keep `Cargo.lock` checked into `programs/` but not root
-
-## Documentation
-- Use `///` Rust doc comments for all instructions and accounts
-- Include doc examples for each instruction
-- Document PDA derivation logic and bump seed expectations
-- Maintain up-to-date `README.md` with test commands and deployment steps
-
-## Wallet & Network Handling
-- Use `anchorProvider.wallet.publicKey` for signer verification in tests
-- Do not hardcode keypairs — use env-based loading (`process.env.ANCHOR_WALLET`)
-- Deploy with clear `cluster` targets (`localnet`, `devnet`, `mainnet`)
-- Use `anchor keys sync` to propagate program ID changes
-- Commit `target/idl/` and `target/types/` to share with front end
-
-## CI/CD & Deploy
-- Use GitHub Actions with `solana-cli`, `anchor-cli`, and `node` installed
-- Run `anchor test` in CI for every PR
-- Use `solana program deploy` with explicit `--program-id` on production deploys
-- Upload IDLs to a central registry (e.g., GitHub, IPFS, or `anchor.cloud`)
+## Workflow
+- Use `anchor build`, `anchor deploy`, `anchor test` — not raw `cargo build-sbf` unless you have a specific reason.
+- Format with `cargo fmt`, lint with `cargo clippy`. Fix clippy warnings before submitting.
+- Use `anchor keys sync` after changing program IDs. Commit `target/idl/` for frontend consumers.

@@ -1,52 +1,39 @@
-# TypeScript Best Practices
+# TypeScript
+Conventions for writing type-safe TypeScript code — run `tsc` to verify before finishing.
 
 ## Type System
-- Prefer interfaces over types for object definitions
-- Use type for unions, intersections, and mapped types
-- Avoid using `any`, prefer `unknown` for unknown types
-- Use strict TypeScript configuration
-- Leverage TypeScript's built-in utility types
-- Use generics for reusable type patterns
+- Use `interface` for object shapes; use `type` for unions, intersections, mapped types, and utilities.
+- Never use `any`. Use `unknown` when the type is truly unknown, then narrow with type guards.
+- Use discriminated unions for state machines and tagged data (`{ type: 'loading' } | { type: 'success'; data: T }`).
+- Use `readonly` for properties that should not be mutated after creation.
+- Leverage built-in utility types (`Pick`, `Omit`, `Partial`, `Required`, `Record`) instead of redefining them.
 
-## Naming Conventions
-- Use PascalCase for type names and interfaces
-- Use camelCase for variables and functions
-- Use UPPER_CASE for constants
-- Use descriptive names with auxiliary verbs (e.g., isLoading, hasError)
-- Prefix interfaces for React props with 'Props' (e.g., ButtonProps)
+## Strictness
+- Enable `strict: true` in `tsconfig.json`. Do not relax strict flags to suppress errors — fix the types.
+- Provide explicit return types on exported/public functions; let the compiler infer for local helpers.
+- Avoid type assertions (`as`) unless interfacing with untyped third-party code. Use type guards or `satisfies` instead.
 
 ## Code Organization
-- Keep type definitions close to where they're used
-- Export types and interfaces from dedicated type files when shared
-- Use barrel exports (index.ts) for organizing exports
-- Place shared types in a `types` directory
-- Co-locate component props with their components
+- Co-locate type definitions with the code that uses them. Extract to a `types.ts` or `types/` directory only when shared across modules.
+- Use barrel exports (`index.ts`) to consolidate a module's public API.
+- Read existing type patterns in the project before introducing new ones.
 
-## Functions
-- Use explicit return types for public functions
-- Use arrow functions for callbacks and methods
-- Implement proper error handling with custom error types
-- Use function overloads for complex type scenarios
-- Prefer async/await over Promises
-
-## Best Practices
-- Enable strict mode in tsconfig.json
-- Use readonly for immutable properties
-- Leverage discriminated unions for type safety
-- Use type guards for runtime type checking
-- Implement proper null checking
-- Avoid type assertions unless necessary
+## Naming
+- `PascalCase` for types, interfaces, enums, and classes.
+- `camelCase` for variables, functions, and methods.
+- `UPPER_SNAKE_CASE` for constants.
+- Use boolean prefixes: `is`, `has`, `should`, `can` (e.g., `isLoading`, `hasPermission`).
+- Suffix React prop interfaces with `Props` (e.g., `ButtonProps`) only if the project already follows this convention.
 
 ## Error Handling
-- Create custom error types for domain-specific errors
-- Use Result types for operations that can fail
-- Implement proper error boundaries
-- Use try-catch blocks with typed catch clauses
-- Handle Promise rejections properly
+- Define custom error classes for domain-specific errors so callers can check with `instanceof` or `errors.Is()`.
+- Use `try/catch` with typed catch; never silently swallow errors.
 
-## Patterns
-- Use the Builder pattern for complex object creation
-- Implement the Repository pattern for data access
-- Use the Factory pattern for object creation
-- Leverage dependency injection
-- Use the Module pattern for encapsulation
+## Generics
+- Use generics for reusable utilities and data structures. Prefer type constraints (`extends`) to keep generics meaningful.
+- Use function overloads when a function has distinct calling signatures with different return types.
+
+## Verification
+- Run `npx tsc --noEmit` to check for type errors after any `.ts` or `.tsx` change.
+- Run the project's lint command (`eslint .`, `npx biome check`) to catch style issues.
+- Run `npm test` and confirm relevant tests pass before finishing.

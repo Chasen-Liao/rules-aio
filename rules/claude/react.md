@@ -1,73 +1,34 @@
-# React Best Practices
+# React
+Conventions for writing React components with modern patterns.
 
-## Component Structure
-- Use functional components over class components
-- Keep components small and focused
-- Extract reusable logic into custom hooks
-- Use composition over inheritance
-- Implement proper prop types with TypeScript
-- Split large components into smaller, focused ones
+## Components
+- Use functional components exclusively. No class components.
+- One component per file; export the component as the default export.
+- Keep components small and focused — extract sub-components or hooks when a file exceeds ~150 lines or a single responsibility.
+- Use composition (children prop, render props, or slots) over inheritance and deep prop drilling.
+- Read the existing component before editing — match its style, export pattern, and surrounding conventions.
 
 ## Hooks
-- Follow the Rules of Hooks
-- Use custom hooks for reusable logic
-- Keep hooks focused and simple
-- Use appropriate dependency arrays in useEffect
-- Implement cleanup in useEffect when needed
-- Avoid nested hooks
+- Follow the Rules of Hooks: call only at the top level, only in components or custom hooks.
+- Extract reusable stateful logic into custom hooks (`use*.ts`) rather than duplicating in components.
+- Get dependency arrays right in `useEffect` and `useMemo`. Include every reactive value the effect reads; run `tsc` to catch React compilation warnings.
+- Add cleanup functions for subscriptions, timers, and event listeners in `useEffect`.
 
-## State Management
-- Use useState for local component state
-- Implement useReducer for complex state logic
-- Use Context API for shared state
-- Keep state as close to where it's used as possible
-- Avoid prop drilling through proper state management
-- Use state management libraries only when necessary
+## State
+- Use `useState` for simple local state, `useReducer` for state with complex transitions.
+- Keep state as close to where it is consumed as possible. Lift state up only when sibling components need it.
+- Use Context only when prop drilling through more than 3 levels is unavoidable.
+- Prefer server state libraries (TanStack Query, SWR) over `useState`+`useEffect` for fetched data.
 
-## Performance
-- Implement proper memoization (useMemo, useCallback)
-- Use React.memo for expensive components
-- Avoid unnecessary re-renders
-- Implement proper lazy loading
-- Use proper key props in lists
-- Profile and optimize render performance
+## Rendering Performance
+- Use `React.memo` only when profiling shows unnecessary re-renders on a pure component with stable props.
+- Use `useMemo` and `useCallback` only when the computation or reference identity matters (e.g., as a dependency or prop to a memoized child), not preemptively.
+- Always provide a stable `key` prop for list items — never use array index as key when items can reorder or be removed.
 
-## Forms
-- Use controlled components for form inputs
-- Implement proper form validation
-- Handle form submission states properly
-- Show appropriate loading and error states
-- Use form libraries for complex forms
-- Implement proper accessibility for forms
-
-## Error Handling
-- Implement Error Boundaries
-- Handle async errors properly
-- Show user-friendly error messages
-- Implement proper fallback UI
-- Log errors appropriately
-- Handle edge cases gracefully
+## Forms and Errors
+- Use controlled components. Wire up validation and show field-level errors before submission.
+- Wrap feature trees in Error Boundaries with fallback UI so one broken component does not crash the whole page.
 
 ## Testing
-- Write unit tests for components
-- Implement integration tests for complex flows
-- Use React Testing Library
-- Test user interactions
-- Test error scenarios
-- Implement proper mock data
-
-## Accessibility
-- Use semantic HTML elements
-- Implement proper ARIA attributes
-- Ensure keyboard navigation
-- Test with screen readers
-- Handle focus management
-- Provide proper alt text for images
-
-## Code Organization
-- Group related components together
-- Use proper file naming conventions
-- Implement proper directory structure
-- Keep styles close to components
-- Use proper imports/exports
-- Document complex component logic
+- Write tests with React Testing Library. Test user behavior (queries by role/text, userEvent), not implementation details.
+- Run the relevant test suite and confirm it passes before declaring a component change done.

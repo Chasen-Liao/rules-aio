@@ -1,81 +1,37 @@
-# Node.js and Express.js Best Practices
+# Node.js
+Conventions for building server-side applications with Node.js and Express.
 
-## Project Structure
-- Use proper directory structure
-- Implement proper module organization
-- Use proper middleware organization
-- Keep routes organized by domain
-- Implement proper error handling
-- Use proper configuration management
+## Project Layout
+- Separate routes, controllers, middleware, models, and services into their own directories.
+- Keep route definitions thin — delegate to controller/service functions.
+- Store configuration in environment variables (`.env`); validate required vars at startup with a small check or a config module.
+- Read the existing project structure before adding new modules — follow the established layout.
 
-## Express Setup
-- Use proper middleware setup
-- Implement proper routing
-- Use proper error handling
-- Configure proper security middleware
-- Implement proper validation
-- Use proper static file serving
+## Express Conventions
+- Use `express.Router()` per domain/resource and mount under versioned path prefixes (`/api/v1/...`).
+- Register middleware in the correct order: CORS, body parser, auth, routes, error handler (always last).
+- Write a centralized error-handling middleware `(err, req, res, next)` — do not let unhandled errors return 500 without context.
 
-## API Design
-- Use proper REST principles
-- Implement proper versioning
-- Use proper request validation
-- Handle errors properly
-- Implement proper response formats
-- Document APIs properly
-
-## Database Integration
-- Use proper ORM/ODM
-- Implement proper migrations
-- Use proper connection pooling
-- Implement proper transactions
-- Use proper query optimization
-- Handle database errors properly
-
-## Authentication
-- Implement proper JWT handling
-- Use proper password hashing
-- Implement proper session management
-- Use proper OAuth integration
-- Implement proper role-based access
-- Handle auth errors properly
+## Async and Error Handling
+- Always `await` promises — never fire-and-forget. Unhandled rejections crash the process.
+- Wrap async route handlers with a helper (`asyncHandler`) or use a router that supports async handlers natively.
+- Use `process.on('unhandledRejection')` as a safety net, not as primary error handling.
+- Return structured error responses with a consistent shape (e.g., `{ error: { code, message } }`) and appropriate HTTP status codes.
 
 ## Security
-- Use proper CORS setup
-- Implement proper rate limiting
-- Use proper security headers
-- Implement proper input validation
-- Use proper encryption
-- Handle security vulnerabilities
+- Use `helmet` for security headers, `cors` with explicit origins, and `express-rate-limit` for endpoint throttling.
+- Validate and sanitize all user input — use a schema validator (Zod, Joi) on every route that accepts input.
+- Never log or expose stack traces, secrets, or full error details in production responses.
 
-## Performance
-- Use proper caching
-- Implement proper async operations
-- Use proper connection pooling
-- Implement proper logging
-- Use proper monitoring
-- Handle high traffic properly
+## Database
+- Use the project's ORM or query builder. Keep raw SQL in dedicated query files, not inline in routes.
+- Use connection pooling. Configure pool size based on expected concurrency.
+- Run migrations as part of deployment; never hand-edit schema in production.
 
 ## Testing
-- Write proper unit tests
-- Implement proper integration tests
-- Use proper test runners
-- Implement proper mocking
-- Test error scenarios
-- Use proper test coverage
+- Write integration tests for API routes. Use the project's test runner (Jest, Vitest, Mocha) and HTTP assertion library (supertest).
+- Run the test suite and confirm it passes before declaring work done.
 
-## Deployment
-- Use proper Docker setup
-- Implement proper CI/CD
-- Use proper environment variables
-- Configure proper logging
-- Implement proper monitoring
-- Handle deployment errors
-
-## Best Practices
-- Follow Node.js best practices
-- Use proper async/await
-- Implement proper error handling
-- Use proper logging
-- Handle process signals properly
-- Document code properly
+## Logging
+- Use a structured logger (pino, winston). Log at appropriate levels — `error` for failures, `warn` for recoverable issues, `info` for request lifecycle.
+- Never use `console.log` in application code.
