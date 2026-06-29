@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { stripFrontmatter } from "../src/converter/util.js";
 import { toCursor } from "../src/converter/cursor.js";
 import { toClaudeFile, claudeImportLine } from "../src/converter/claude.js";
+import { toCodexChunk } from "../src/converter/codex.js";
 
 describe("stripFrontmatter", () => {
   it("removes a leading YAML frontmatter block", () => {
@@ -36,5 +37,12 @@ describe("toClaudeFile", () => {
 describe("claudeImportLine", () => {
   it("produces an @import line", () => {
     expect(claudeImportLine("react")).toBe("@.claude/rules/react.md");
+  });
+});
+
+describe("toCodexChunk", () => {
+  it("produces a titled markdown chunk with frontmatter stripped", () => {
+    const raw = "---\ndescription: x\n---\nUse strict typing.";
+    expect(toCodexChunk("TypeScript", raw)).toBe("## TypeScript\n\nUse strict typing.\n");
   });
 });
