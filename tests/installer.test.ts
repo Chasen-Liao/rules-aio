@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtemp, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { writeManagedSection } from "../src/installer.js";
+import { writeManagedSection, install } from "../src/installer.js";
 
 let dir: string;
 let file: string;
@@ -38,5 +38,31 @@ describe("writeManagedSection", () => {
     const content = await readFile(file, "utf8");
     expect(content).toContain("line B");
     expect(content).not.toContain("line A");
+  });
+});
+
+describe("install", () => {
+  it("in --yes mode, writes cursor/claude/codex files for a fake react project", async () => {
+    await writeFile(path.join(dir, "package.json"), JSON.stringify({ dependencies: { react: "^18" } }));
+
+    const fakeRaw = "---\ndescription: x\n---\n# React rules\nbe strict";
+    const deps = {
+      fetchRaw: async () => fakeRaw,
+    };
+
+    await install(dir, { yes: true }, deps);
+
+    const cursorFile = await readFile(path.join(dir, ".cursor/rules/react.mdc"), "utf8");
+    expect(cursorFile).toBe(fakeRaw);
+
+    const claudeRule = await readFile(path.join(dir, ".claude/rules/react.md"), "utf8");
+    expect(claudeRule).toBe("# React rules\nbe strict");
+
+    const claudeMd = await readFile(path.join(dir, "CLAUDE.md"), "utf8");
+    expect(claudeMd).toContain("@.claude/rules/react.md");
+
+    const agentsMd = await readFile(path.join(dir, "AGENTS.md"), "utf8");
+    expect(agentsMd).toContain("## React");
+    expect(agentsMd).toContain("be strict");
   });
 });
