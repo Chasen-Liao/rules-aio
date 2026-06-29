@@ -1,0 +1,31 @@
+{
+  "name": "rules-aio",
+  "version": "0.1.0",
+  "description": "Auto-detect your project's tech stack and install matching coding rules into Claude Code, Codex, and Cursor.",
+  "type": "module",
+  "bin": {
+    "rules-aio": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "src/registry/rules-index.json"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "dev": "tsx src/index.ts"
+  },
+  "engines": {
+    "node": ">=20.11"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.0.0",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}
