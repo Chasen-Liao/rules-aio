@@ -18,7 +18,7 @@ const UPSTREAM_FILE: Record<string, string> = {
   python: "python.mdc",
   fastapi: "fastapi.mdc",
   go: "go.mdc",
-  rust: "rust.mdc",
+  rust: "rust-general.mdc",
 };
 
 async function fetchRaw(id: string): Promise<string> {
