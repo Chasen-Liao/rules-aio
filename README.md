@@ -34,13 +34,16 @@ Reference documents:
 ## Usage
 
 ```bash
-npx rules-aio          # interactive (recommended rules pre-checked)
-npx rules-aio --yes    # non-interactive, install all detected rules
+npx rules-aio                                # interactive: pick rules + agents
+npx rules-aio --yes                          # non-interactive, all detected rules, all agents
+npx rules-aio --yes --target claude,cursor   # only the given agents
+npx rules-aio uninstall                      # remove installed rules
+npx rules-aio uninstall --target cursor      # remove only one agent's rules
 ```
 
-The default command scans the current project, recommends matching rules, and shows an interactive selection prompt. The `--yes` flag skips the prompt and installs all detected recommended rules.
+The default command scans the current project, recommends matching rules, and shows interactive prompts to pick rules and target agents. `--yes` skips both prompts. `--target` selects specific agents (`cursor`, `claude`, `codex`). `uninstall` reads the install manifest and removes what was installed.
 
-默认命令会扫描当前项目、推荐匹配规则，并显示交互式选择菜单。`--yes` 会跳过确认流程，直接安装所有检测到的推荐规则。
+默认命令会扫描当前项目、推荐匹配规则，并通过交互菜单选择规则和目标 agent。`--yes` 跳过两道确认。`--target` 指定目标 agent（`cursor`、`claude`、`codex`）。`uninstall` 读取安装清单并移除已安装的内容。
 
 ## Outputs
 
@@ -57,6 +60,10 @@ The default command scans the current project, recommends matching rules, and sh
 Managed sections will be idempotent, so re-running the CLI updates generated blocks without duplicating them.
 
 生成内容会使用可重复更新的 managed section，因此多次运行不会重复追加同一批规则。
+
+Rule content is bundled inside the package (no network access at install time). The Cursor variant keeps the upstream original; the Claude Code and Codex variants are adapted for each agent.
+
+规则内容打包在包内（安装时无需联网）。Cursor 版保留上游原版；Claude Code 与 Codex 版针对各自 agent 做了适配改写。
 
 ## Detection
 
