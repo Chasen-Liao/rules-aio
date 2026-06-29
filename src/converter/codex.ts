@@ -1,6 +1,6 @@
 import { stripFrontmatter } from "./util.js";
 
-export function toCodexChunk(title: string, raw: string): string {
-  const body = stripFrontmatter(raw).trim();
+export function toCodexChunk(title: string, content: string): string {
+  const body = stripFrontmatter(content).trim();
   return `## ${title}\n\n${body}\n`;
 }
