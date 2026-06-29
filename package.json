@@ -8,10 +8,12 @@
   },
   "files": [
     "dist",
+    "rules",
     "src/registry/rules-index.json"
   ],
   "scripts": {
     "build": "tsc",
+    "sync": "tsx scripts/sync-rules.ts",
     "test": "vitest run",
     "dev": "tsx src/index.ts"
   },
