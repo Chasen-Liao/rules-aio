@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import indexData from "../src/registry/rules-index.json" with { type: "json" };
@@ -29,6 +29,15 @@ async function fetchRaw(id: string): Promise<string> {
   return res.text();
 }
 
+async function exists(file: string): Promise<boolean> {
+  try {
+    await access(file);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function main(): Promise<void> {
   const rules = indexData as Array<{ id: string }>;
   for (const { id } of rules) {
@@ -37,11 +46,19 @@ async function main(): Promise<void> {
     await mkdir(path.join(RULES_DIR, "claude"), { recursive: true });
     await mkdir(path.join(RULES_DIR, "codex"), { recursive: true });
 
+    // Cursor: always refresh the upstream original.
     await writeFile(path.join(RULES_DIR, "cursor", `${id}.mdc`), raw, "utf8");
+
+    // Claude / Codex: only seed an initial stripped version when the file
+    // does not already exist. Existing files are hand-adapted — never overwrite.
     const body = stripFrontmatter(raw);
-    await writeFile(path.join(RULES_DIR, "claude", `${id}.md`), body, "utf8");
-    await writeFile(path.join(RULES_DIR, "codex", `${id}.md`), body, "utf8");
-    console.log(`synced ${id}`);
+    const claudePath = path.join(RULES_DIR, "claude", `${id}.md`);
+    const codexPath = path.join(RULES_DIR, "codex", `${id}.md`);
+    const claudeStatus = (await exists(claudePath)) ? "kept" : "seeded";
+    const codexStatus = (await exists(codexPath)) ? "kept" : "seeded";
+    if (claudeStatus === "seeded") await writeFile(claudePath, body, "utf8");
+    if (codexStatus === "seeded") await writeFile(codexPath, body, "utf8");
+    console.log(`synced ${id} (cursor: refreshed, claude: ${claudeStatus}, codex: ${codexStatus})`);
   }
 }
 
