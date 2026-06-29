@@ -1,106 +1,96 @@
 # rules-aio
 
-`rules-aio` is a planned `npx` CLI that auto-detects a project's tech stack and installs matching coding rules into Claude Code, Codex, and Cursor.
+> One command. The right coding rules for Claude Code, Codex, and Cursor — picked for your project's actual stack.
 
-`rules-aio` 是一个计划中的 `npx` 命令行工具，用于自动识别当前项目的技术栈，并把匹配的编程规则安装到 Claude Code、Codex 和 Cursor。
+**English** · [简体中文](README.zh-CN.md)
 
-The tool is designed to combine two useful workflows:
+---
 
-- automatic project scanning, similar to Cursor-focused rule installers
-- multi-agent rule distribution across Claude Code, Codex, and Cursor
+`rules-aio` is an `npx` CLI that looks at your project, figures out which languages and frameworks you use, and installs only the coding rules that matter — into every AI coding agent you run. No copy-pasting rule files. No importing a giant rules dump into your context. Just the rules that fit your project, in each agent's native format.
 
-它的目标是把“自动扫描项目”和“多 Agent 规则分发”结合起来：既能自动识别项目类型，也能同时服务 Claude Code、Codex 和 Cursor。
+It combines two things that, until now, lived in separate tools:
 
-Rule content is planned to be sourced from [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules), then converted into each agent's expected format.
+- **Automatic project detection** — scans `package.json`, `go.mod`, `requirements.txt`, and friends to know what you're building.
+- **Multi-agent distribution** — writes the same guidance into Claude Code (`CLAUDE.md`), Codex (`AGENTS.md`), and Cursor (`.cursor/rules/`), each adapted to how that agent actually reads rules.
 
-规则内容计划来源于 [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules)，再转换成各个 Agent 原生支持的格式。
+The rule library is **community-maintained**. The Cursor variants keep the upstream originals from [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules); the Claude Code and Codex variants are hand-adapted so they read naturally for each agent. **Help us keep them sharp — contributions welcome.** 👉 [Contributing](#contributing)
 
-## Status
+## Quick start
 
-The CLI is implemented and working: `npx rules-aio` detects a project's tech stack and installs matching rules into Claude Code, Codex, and Cursor. Tests pass and the package builds cleanly.
-
-CLI 已实现并可用：`npx rules-aio` 会检测项目技术栈，并把匹配的规则安装到 Claude Code、Codex 和 Cursor。测试通过，构建无误。
-
-Reference documents:
-
-- [Design spec](docs/superpowers/specs/2026-06-29-rules-aio-design.md)
-- [Implementation plan](docs/superpowers/plans/2026-06-29-rules-aio.md)
-
-参考文档：
-
-- [设计文档](docs/superpowers/specs/2026-06-29-rules-aio-design.md)
-- [实现计划](docs/superpowers/plans/2026-06-29-rules-aio.md)
-
-## Usage
+Run it from the root of the project you want to configure:
 
 ```bash
-npx rules-aio                                # interactive: pick rules + agents
-npx rules-aio --yes                          # non-interactive, all detected rules, all agents
-npx rules-aio --yes --target claude,cursor   # only the given agents
-npx rules-aio uninstall                      # remove installed rules
-npx rules-aio uninstall --target cursor      # remove only one agent's rules
+npx rules-aio                                # interactive: pick rules + target agents
+npx rules-aio --yes                          # non-interactive: all detected rules, all agents
+npx rules-aio --yes --target claude,cursor   # only specific agents
+npx rules-aio uninstall                      # remove everything rules-aio installed
+npx rules-aio uninstall --target cursor      # remove just one agent's rules
 ```
 
-The default command scans the current project, recommends matching rules, and shows interactive prompts to pick rules and target agents. `--yes` skips both prompts. `--target` selects specific agents (`cursor`, `claude`, `codex`). `uninstall` reads the install manifest and removes what was installed.
+- `--yes` skips both prompts (rules and agents) and installs every detected rule.
+- `--target` takes a comma-separated list of `cursor`, `claude`, `codex`.
+- `uninstall` reads the install manifest and cleanly removes what was written.
 
-默认命令会扫描当前项目、推荐匹配规则，并通过交互菜单选择规则和目标 agent。`--yes` 跳过两道确认。`--target` 指定目标 agent（`cursor`、`claude`、`codex`）。`uninstall` 读取安装清单并移除已安装的内容。
+## Where the rules go
 
-## Outputs
-
-`rules-aio` writes rules into the native locations used by each supported agent:
-
-`rules-aio` 会把规则写入每个 Agent 对应的原生配置位置：
-
-| Agent | Output |
+| Agent | Output location |
 | --- | --- |
 | Cursor | `.cursor/rules/<rule>.mdc` |
-| Claude Code | `.claude/rules/<rule>.md` plus managed imports in `CLAUDE.md` |
+| Claude Code | `.claude/rules/<rule>.md` + managed `@import` lines in `CLAUDE.md` |
 | Codex | managed rule sections in `AGENTS.md` |
 
-Managed sections will be idempotent, so re-running the CLI updates generated blocks without duplicating them.
+Managed sections are **idempotent** — re-running the CLI updates the generated blocks instead of duplicating them, and `uninstall` removes them cleanly.
 
-生成内容会使用可重复更新的 managed section，因此多次运行不会重复追加同一批规则。
+## What gets detected
 
-Rule content is bundled inside the package (no network access at install time). The Cursor variant keeps the upstream original; the Claude Code and Codex variants are adapted for each agent.
+| Manifest | Detects |
+| --- | --- |
+| `package.json` | React, Next.js, Vue, Nuxt, Node.js, TypeScript, Express, Fastify, NestJS, Tailwind CSS, Prisma, React Native |
+| `requirements.txt` / `pyproject.toml` | Python, FastAPI, Django, Flask |
+| `go.mod` | Go |
+| `Cargo.toml` | Rust |
 
-规则内容打包在包内（安装时无需联网）。Cursor 版保留上游原版；Claude Code 与 Codex 版针对各自 agent 做了适配改写。
+Don't see your stack? That's a great first PR — see below.
 
-## Detection
+## How it works
 
-The first version detects common languages and frameworks from project manifest files:
+Five small, focused modules:
 
-第一版会从常见项目清单文件中检测语言和框架：
+- **`detector`** — scans project files, returns tech-stack tags.
+- **`registry`** — the packaged rule index; matches rules by tag and reads the vendored per-agent files.
+- **`converter`** — builds Claude Code import lines and Codex sections.
+- **`installer`** — orchestrates detect → match → prompt → write, and records an install manifest (`.rules-aio.json`).
+- **`uninstaller`** — reads the manifest and removes the installed files and managed sections.
 
-- `package.json`: React, Next.js, Vue, Node.js, TypeScript, Express, Fastify, NestJS, Tailwind CSS, Prisma
-- `requirements.txt` / `pyproject.toml`: Python, FastAPI, Django, Flask
-- `go.mod`: Go
-- `Cargo.toml`: Rust
+Rule content is **bundled inside the package**, so install never needs network access.
 
-## Architecture
+## Contributing
 
-The implementation is split into four focused units:
+The rules are the heart of this project, and keeping them accurate and agent-appropriate is a community effort. **PRs are very welcome** — whether it's tightening an existing rule, adapting one better for Claude Code or Codex, or adding support for a whole new stack.
 
-实现拆成四个职责明确的模块：
+### How rules are organized
 
-- `detector`: scans project files and returns tech-stack tags
-- `registry`: stores the packaged rule index, matches rules by tag, and reads the vendored per-agent rule files
-- `converter`: builds Claude Code import lines and Codex sections
-- `installer`: orchestrates detection, matching, prompting, target selection, and file writes; records an install manifest
-- `uninstaller`: reads the manifest and removes installed files and managed sections
+Each rule has three variants, one per agent:
 
-中文说明：
+```
+rules/
+  cursor/<id>.mdc   # upstream original, kept verbatim (refreshed by `npm run sync`)
+  claude/<id>.md    # adapted for Claude Code (persistent-context directives)
+  codex/<id>.md     # adapted for Codex (AGENTS.md conventions + runnable commands)
+```
 
-- `detector`：扫描项目文件，输出技术栈标签
-- `registry`：维护打包进 npm 的规则索引，按标签匹配规则，并读取本地各 agent 的规则文件
-- `converter`：生成 Claude Code 的 import 行和 Codex 的章节
-- `installer`：编排检测、匹配、交互确认、目标选择和写入流程，并记录安装清单
-- `uninstaller`：读取清单，移除已安装的文件和 managed section
+### Add or improve a rule
+
+1. Add an entry to [`src/registry/rules-index.json`](src/registry/rules-index.json) with `{ id, title, tags }` (tags must match what the [detector](src/detector.ts) emits).
+2. Drop the three variant files under `rules/<agent>/`.
+3. For upstream-sourced Cursor rules, `npm run sync` fetches the original and **seeds** claude/codex only when those files don't yet exist — your hand-adapted versions are never overwritten.
+4. Open a PR.
+
+Good first issues: improve the depth of an existing rule, fix a Cursor-ism that slipped into a claude/codex variant, or add detection + rules for a stack that's missing (e.g. Django, Vue, Ruby, Java).
 
 ## Attribution
 
-Rule content comes from [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules) (MIT). The Cursor variant keeps the upstream original; the Claude Code and Codex variants are adapted for each agent.
-
-规则内容来自 [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules)（MIT）。Cursor 版保留上游原版；Claude Code 与 Codex 版针对各自 agent 做了适配。
+Rule content originates from [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules) (MIT). Cursor variants preserve the upstream originals; the Claude Code and Codex variants are adapted for each agent.
 
 ## Star History
 
