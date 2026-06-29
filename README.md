@@ -83,22 +83,24 @@ The implementation is split into four focused units:
 实现拆成四个职责明确的模块：
 
 - `detector`: scans project files and returns tech-stack tags
-- `registry`: stores the packaged rule index and matches rules by tag
-- `converter`: converts Cursor `.mdc` rules into Cursor, Claude Code, and Codex formats
-- `installer`: orchestrates detection, matching, fetching, prompting, conversion, and file writes
+- `registry`: stores the packaged rule index, matches rules by tag, and reads the vendored per-agent rule files
+- `converter`: builds Claude Code import lines and Codex sections
+- `installer`: orchestrates detection, matching, prompting, target selection, and file writes; records an install manifest
+- `uninstaller`: reads the manifest and removes installed files and managed sections
 
 中文说明：
 
 - `detector`：扫描项目文件，输出技术栈标签
-- `registry`：维护打包进 npm 的规则索引，并按标签匹配规则
-- `converter`：把 Cursor `.mdc` 规则转换为 Cursor、Claude Code 和 Codex 格式
-- `installer`：编排检测、匹配、拉取、交互确认、转换和写入流程
+- `registry`：维护打包进 npm 的规则索引，按标签匹配规则，并读取本地各 agent 的规则文件
+- `converter`：生成 Claude Code 的 import 行和 Codex 的章节
+- `installer`：编排检测、匹配、交互确认、目标选择和写入流程，并记录安装清单
+- `uninstaller`：读取清单，移除已安装的文件和 managed section
 
 ## Attribution
 
-Rule content comes from [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules). Each indexed rule retains its upstream source URL and license metadata.
+Rule content comes from [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules) (MIT). The Cursor variant keeps the upstream original; the Claude Code and Codex variants are adapted for each agent.
 
-规则内容来自 [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules)。每条索引规则都保留了上游来源 URL 和许可证信息。
+规则内容来自 [PatrickJS/awesome-cursorrules](https://github.com/PatrickJS/awesome-cursorrules)（MIT）。Cursor 版保留上游原版；Claude Code 与 Codex 版针对各自 agent 做了适配。
 
 ## Star History
 
