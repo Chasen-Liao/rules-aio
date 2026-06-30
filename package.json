@@ -1,6 +1,6 @@
 {
   "name": "rules-aio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Auto-detect your project's tech stack and install matching coding rules into Claude Code, Codex, and Cursor.",
   "type": "module",
   "license": "MIT",
