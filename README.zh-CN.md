@@ -17,7 +17,22 @@
 
 ## 快速开始
 
-在想配置的项目根目录下运行：
+在想配置的项目根目录下运行。有两种方式：
+
+**无需安装——直接用 `npx` 跑最新版：**
+
+```bash
+npx rules-aio
+```
+
+**或全局安装后，直接用 `rules-aio` 命令：**
+
+```bash
+npm install -g rules-aio
+rules-aio
+```
+
+两种方式支持的参数完全一样：
 
 ```bash
 npx rules-aio                                # 交互式：选择规则和目标 agent

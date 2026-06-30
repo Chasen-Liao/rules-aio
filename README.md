@@ -17,7 +17,22 @@ The rule library is **community-maintained**. The Cursor variants keep the upstr
 
 ## Quick start
 
-Run it from the root of the project you want to configure:
+Run it from the root of the project you want to configure. There are two ways to use it:
+
+**No install — run the latest version on the fly:**
+
+```bash
+npx rules-aio
+```
+
+**Or install it globally, then use the `rules-aio` command directly:**
+
+```bash
+npm install -g rules-aio
+rules-aio
+```
+
+Both forms take the same flags:
 
 ```bash
 npx rules-aio                                # interactive: pick rules + target agents
