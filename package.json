@@ -8,7 +8,7 @@
   "homepage": "https://github.com/Chasen-Liao/rules-aio#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Chasen-Liao/rules-aio.git"
+    "url": "git+https://github.com/Chasen-Liao/rules-aio.git"
   },
   "bugs": {
     "url": "https://github.com/Chasen-Liao/rules-aio/issues"
